@@ -102,3 +102,9 @@ solving:
   check_objective:
     enable: false
 
+plotting:
+  costs_max: 1000
+  costs_threshold: 0.0000000001
+  energy_max:
+  energy_min:
+  energy_threshold: 0.000000001

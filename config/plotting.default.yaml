@@ -582,6 +582,7 @@ plotting:
     # heat demand
     Heat load: '#cc1f1f'
     heat: '#cc1f1f'
+    heat dsm: '#cc1f1f'
     heat vent: '#aa3344'
     heat demand: '#cc1f1f'
     rural heat: '#ff5c5c'
