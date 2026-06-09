@@ -213,6 +213,9 @@ if __name__ == "__main__":
         orientation="horizontal",
     )
     cbr.outline.set_edgecolor("None")
+    cbr.ax.xaxis.set_major_formatter(
+        plt.FuncFormatter(lambda x, p: f"{x:.1f}")
+    )
 
     # add legend
     legend_kwargs = {
