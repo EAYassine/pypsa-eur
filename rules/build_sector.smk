@@ -456,14 +456,16 @@ def input_hera_data(w) -> dict[str, str]:
             "hera_ambient_temperature_2013": f"data/hera_{hera_data_key}/ambient_temp_{hera_data_key}.nc",
         }
     else:
-        from scripts._helpers import get_snapshots
+        hera_year = config_provider("sector", "hera_data_year")(w)
+        if hera_year is not None:
+            unique_years = [hera_year]
+        else:
+            from scripts._helpers import get_snapshots
 
-        # Get all snapshots and extract unique years
-        snapshots_config = config_provider("snapshots")(w)
-        snapshots = get_snapshots(snapshots_config)
-        unique_years = snapshots.year.unique()
+            snapshots_config = config_provider("snapshots")(w)
+            snapshots = get_snapshots(snapshots_config)
+            unique_years = snapshots.year.unique()
 
-        # Create dictionary with year-specific keys
         result = {}
         for year in unique_years:
             result[f"hera_river_discharge_{year}"] = (

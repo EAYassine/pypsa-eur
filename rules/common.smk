@@ -217,6 +217,16 @@ def solved_previous_horizon(w):
 
 def input_cutout(wildcards, cutout_names="default"):
 
+    prepared_dir = config.get("atlite", {}).get("prepared_cutout_dir")
+
+    if prepared_dir:
+        if cutout_names == "default":
+            cutout_names = config_provider("atlite", "default_cutout")(wildcards)
+        if isinstance(cutout_names, list):
+            return [f"{prepared_dir}/{cn}.nc" for cn in cutout_names]
+        else:
+            return f"{prepared_dir}/{cutout_names}.nc"
+
     cutouts_path = dataset_version("cutout")["folder"]
 
     if cutout_names == "default":

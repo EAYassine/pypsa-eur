@@ -1048,6 +1048,14 @@ def load_cutout(
     atlite.Cutout
         Merged cutout with optional time selection applied.
     """
+    from atlite.datasets import modules as datamodules
+
+    if "custom" not in datamodules:
+        import types
+        m = types.ModuleType("custom")
+        m.crs = 4326
+        datamodules["custom"] = m
+
     if isinstance(cutout_files, str):
         cutout = atlite.Cutout(cutout_files, chunks=chunks)
     elif isinstance(cutout_files, list):

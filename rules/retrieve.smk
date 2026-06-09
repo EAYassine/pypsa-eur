@@ -393,7 +393,9 @@ if (BIDDING_ZONES_ENTSOEPY_DATASET := dataset_version("bidding_zones_entsoepy"))
 
 
 
-if (CUTOUT_DATASET := dataset_version("cutout"))["source"] in [
+if not config.get("atlite", {}).get("prepared_cutout_dir") and (
+    CUTOUT_DATASET := dataset_version("cutout")
+)["source"] in [
     "archive",
 ]:
 

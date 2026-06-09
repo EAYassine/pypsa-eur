@@ -191,24 +191,27 @@ rule build_shapes:
         scripts("build_shapes.py")
 
 
-if CUTOUT_DATASET["source"] in ["build"]:
+if not config.get("atlite", {}).get("prepared_cutout_dir"):
+    if "CUTOUT_DATASET" not in dir():
+        CUTOUT_DATASET = dataset_version("cutout")
+    if CUTOUT_DATASET["source"] in ["build"]:
 
-    rule build_cutout:
-        output:
-            cutout=CUTOUT_DATASET["folder"] / "{cutout}.nc",
-        log:
-            "logs/build_cutout/{cutout}.log",
-        benchmark:
-            "benchmarks/build_cutout/{cutout}"
-        threads: config["atlite"].get("nprocesses", 4)
-        resources:
-            mem_mb=config["atlite"].get("nprocesses", 4) * 1000,
-        params:
-            cutouts=config_provider("atlite", "cutouts"),
-        message:
-            "Building cutout data for {wildcards.cutout}"
-        script:
-            scripts("build_cutout.py")
+        rule build_cutout:
+            output:
+                cutout=CUTOUT_DATASET["folder"] / "{cutout}.nc",
+            log:
+                "logs/build_cutout/{cutout}.log",
+            benchmark:
+                "benchmarks/build_cutout/{cutout}"
+            threads: config["atlite"].get("nprocesses", 4)
+            resources:
+                mem_mb=config["atlite"].get("nprocesses", 4) * 1000,
+            params:
+                cutouts=config_provider("atlite", "cutouts"),
+            message:
+                "Building cutout data for {wildcards.cutout}"
+            script:
+                scripts("build_cutout.py")
 
 
 rule build_ship_raster:

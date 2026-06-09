@@ -306,13 +306,20 @@ if __name__ == "__main__":
         )
         load = load.apply(fill_large_gaps, shift=time_shift)
 
+    fixed_year = snakemake.params["load"].get("fixed_year", False)
+
     if snakemake.params.load["supplement_synthetic"]:
         logger.info("Supplement missing data with synthetic data.")
         fn = snakemake.input.synthetic
         synthetic_load = pd.read_csv(fn, index_col=0, parse_dates=True)
         # UA, MD, XK, CY, MT do not appear in synthetic load data
         countries = list(set(countries) - set(["UA", "MD", "XK", "CY", "MT"]))
-        synthetic_load = synthetic_load.loc[snapshots, countries]
+        if fixed_year:
+            synthetic_load = synthetic_load.loc[
+                slice(str(fixed_year), str(fixed_year)), countries
+            ]
+        else:
+            synthetic_load = synthetic_load.loc[snapshots, countries]
         load = load.combine_first(synthetic_load)
 
     assert not load.isna().any().any(), (
@@ -321,17 +328,13 @@ if __name__ == "__main__":
         "for implementing the needed load data modifications."
     )
 
-    fixed_year = snakemake.params["load"].get("fixed_year", False)
-    years = (
-        slice(str(fixed_year), str(fixed_year))
-        if fixed_year
-        else slice(snapshots[0], snapshots[-1])
-    )
-
-    load = load.loc[years].reindex(index=snapshots)
-
-    # need to reindex load time series to target year
     if fixed_year:
+        years = slice(str(fixed_year), str(fixed_year))
+        load = load.loc[years]
         load.index = load.index.map(lambda t: t.replace(year=snapshots.year[0]))
+        load = load.reindex(index=snapshots)
+    else:
+        years = slice(snapshots[0], snapshots[-1])
+        load = load.loc[years].reindex(index=snapshots)
 
     load.to_csv(snakemake.output[0])

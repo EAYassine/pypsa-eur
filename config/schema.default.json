@@ -174,6 +174,18 @@
           "default": "europe-2013-sarah3-era5",
           "description": "Defines a default cutout. Can refer to a single cutout or a list of cutouts."
         },
+        "prepared_cutout_dir": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Path to a directory with pre-made cutout files. If set, cutouts are loaded from ``<prepared_cutout_dir>/<name>.nc`` instead of the versioned data path, and the retrieve/build rules are skipped. Use for externally generated cutouts (e.g. climate-change-adjusted weather data)."
+        },
         "nprocesses": {
           "default": 1,
           "description": "Number of parallel processes in cutout preparation.",
@@ -5122,6 +5134,18 @@
               "type": "object"
             }
           }
+        },
+        "hera_data_year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Manually specify a single reference year for HERA river discharge and ambient temperature data. If set, that year's data is retrieved, its time index is rebased to match the snapshot period, and if snapshots span multiple years the single year is tiled across all snapshot years. If None (default), HERA years are derived from snapshot years."
         }
       }
     },
@@ -8815,6 +8839,18 @@
           "default": "europe-2013-sarah3-era5",
           "description": "Defines a default cutout. Can refer to a single cutout or a list of cutouts."
         },
+        "prepared_cutout_dir": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Path to a directory with pre-made cutout files. If set, cutouts are loaded from ``<prepared_cutout_dir>/<name>.nc`` instead of the versioned data path, and the retrieve/build rules are skipped. Use for externally generated cutouts (e.g. climate-change-adjusted weather data)."
+        },
         "nprocesses": {
           "default": 1,
           "description": "Number of parallel processes in cutout preparation.",
@@ -11590,6 +11626,18 @@
               "type": "object"
             }
           }
+        },
+        "hera_data_year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Manually specify a single reference year for HERA river discharge and ambient temperature data. If set, that year's data is retrieved, its time index is rebased to match the snapshot period, and if snapshots span multiple years the single year is tiled across all snapshot years. If None (default), HERA years are derived from snapshot years."
         }
       }
     },

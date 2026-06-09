@@ -187,6 +187,7 @@ electricity:
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#atlite
 atlite:
   default_cutout: "europe-2013-sarah3-era5"
+  prepared_cutout_dir:
   nprocesses: 1
   show_progress: false
   plot_availability_matrix: false
@@ -982,6 +983,7 @@ sector:
       methanol: 121
       gas: 122
       oil: 125
+  hera_data_year:
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#industry
 industry:

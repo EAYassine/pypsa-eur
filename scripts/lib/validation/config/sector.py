@@ -919,3 +919,13 @@ class SectorConfig(BaseModel):
     imports: _ImportsConfig = Field(
         default_factory=_ImportsConfig, description="Imports configuration."
     )
+
+    hera_data_year: int | None = Field(
+        None,
+        description="Manually specify a single reference year for HERA river "
+        "discharge and ambient temperature data. If set, that year's data is "
+        "retrieved, its time index is rebased to match the snapshot period, "
+        "and if snapshots span multiple years the single year is tiled across "
+        "all snapshot years. If None (default), HERA years are derived from "
+        "snapshot years.",
+    )

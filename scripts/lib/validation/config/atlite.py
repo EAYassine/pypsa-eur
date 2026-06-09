@@ -113,6 +113,10 @@ class AtliteConfig(BaseModel):
         "europe-2013-sarah3-era5",
         description="Defines a default cutout. Can refer to a single cutout or a list of cutouts.",
     )
+    prepared_cutout_dir: str | None = Field(
+        None,
+        description="Path to a directory with pre-made cutout files. If set, cutouts are loaded from ``<prepared_cutout_dir>/<name>.nc`` instead of the versioned data path, and the retrieve/build rules are skipped. Use for externally generated cutouts (e.g. climate-change-adjusted weather data).",
+    )
     nprocesses: int = Field(
         1,
         description="Number of parallel processes in cutout preparation.",
