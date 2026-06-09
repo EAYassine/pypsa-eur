@@ -425,6 +425,7 @@ conventional:
   unit_commitment: false
   dynamic_fuel_price: false
   fuel_price_rolling_window: 6
+  fixed_year: false
   nuclear:
     p_max_pu: data/nuclear_p_max_pu.csv
 

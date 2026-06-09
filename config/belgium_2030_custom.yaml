@@ -70,6 +70,9 @@ atlite:
 load:
   fixed_year: 2019
 
+conventional:
+  fixed_year: 2019
+
 renewable:
   offwind-ac:
     max_depth: false

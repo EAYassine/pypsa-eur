@@ -690,6 +690,18 @@
           "minimum": 1,
           "type": "integer"
         },
+        "fixed_year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "boolean"
+            }
+          ],
+          "default": false,
+          "description": "Override the year used for conventional generator parameters (e.g. capacity factors, fuel prices). When set to an integer (e.g. 2019), the CSV column for that year is selected. When False (default), the snapshot year is used. Falls back to the last available column if the requested year is not present."
+        },
         "nuclear": {
           "additionalProperties": {
             "anyOf": [
@@ -10114,6 +10126,18 @@
           "description": "Monthly rolling mean window for fossil fuel prices smoothing.",
           "minimum": 1,
           "type": "integer"
+        },
+        "fixed_year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "boolean"
+            }
+          ],
+          "default": false,
+          "description": "Override the year used for conventional generator parameters (e.g. capacity factors, fuel prices). When set to an integer (e.g. 2019), the CSV column for that year is selected. When False (default), the snapshot year is used. Falls back to the last available column if the requested year is not present."
         },
         "nuclear": {
           "additionalProperties": {

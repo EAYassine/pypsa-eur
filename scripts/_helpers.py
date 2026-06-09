@@ -949,7 +949,7 @@ def _rebase_and_tile_time(
     if not set(data_years) & set(snap_years):
         shift = pd.DateOffset(years=int(snap_years.min() - data_years.min()))
         da = da.copy(deep=False)
-        da["time"] = da.time + shift
+        da["time"] = pd.DatetimeIndex(da.time.values) + shift
         data_years = pd.DatetimeIndex(da.time.values).year.unique()
 
     if len(data_years) == 1 and len(snap_years) > 1:
@@ -960,7 +960,7 @@ def _rebase_and_tile_time(
                 continue
             offset = pd.DateOffset(years=int(tgt_year - src_year))
             piece = da.copy(deep=False)
-            piece["time"] = da.time + offset
+            piece["time"] = pd.DatetimeIndex(da.time.values) + offset
             pieces.append(piece)
         da = xr.concat(pieces, dim="time").sortby("time")
 

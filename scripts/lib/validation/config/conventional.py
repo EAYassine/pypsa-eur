@@ -31,6 +31,10 @@ class ConventionalConfig(ConfigModel):
         description="Monthly rolling mean window for fossil fuel prices smoothing.",
         ge=1,
     )
+    fixed_year: int | bool = Field(
+        False,
+        description="Override the year used for conventional generator parameters (e.g. capacity factors, fuel prices). When set to an integer (e.g. 2019), the CSV column for that year is selected. When False (default), the snapshot year is used. Falls back to the last available column if the requested year is not present.",
+    )
     nuclear: dict[str, str | float] = Field(
         default_factory=lambda: {"p_max_pu": "data/nuclear_p_max_pu.csv"},
         description="For any carrier/technology overwrite attributes as listed below.",

@@ -58,12 +58,31 @@ else:
 
 Set `load.fixed_year: 2019` (or another year with good coverage) in the config to use historical load data rebased to the snapshot year.
 
+### Conventional generator parameters: `conventional.fixed_year` for fixed year selection
+
+`scripts/add_electricity.py:684` selects conventional generator parameters (e.g. nuclear `p_max_pu`) from CSV files with columns indexed by year. For future-year snapshots (e.g. 2030), the CSV may not have a matching column, causing `KeyError: 2030`.
+
+**Fix** (`scripts/add_electricity.py:682-687`):
+
+1. Added `conventional.fixed_year` config option (default `false`) in `scripts/lib/validation/config/conventional.py`.
+2. When set (e.g. `conventional.fixed_year: 2019`), the CSV column for that year is selected instead of the snapshot year.
+3. Added `KeyError` to the except clause so any year not found gracefully falls back to the last available column.
+
+```python
+year = conventional_params.get("fixed_year", False) or n.snapshots[0].year
+values = df[year]
+except (ValueError, TypeError, KeyError):
+    values = df.iloc[:, -1]
+```
+
+Set `conventional.fixed_year: 2019` in the config to use 2019 conventional generator parameters.
+
 ### Shared time-rebase utility: `_rebase_and_tile_time` in `_helpers.py`
 
 A public function `_rebase_and_tile_time(da, snapshots)` lives in `scripts/_helpers.py:925-964`. It:
 
 1. **Drops Feb 29** entries from the time dimension before any time-shifting to avoid leap-day crashes (e.g. 2020→2030 where 2020 has Feb 29 but 2030 doesn't).
-2. **Shifts** time coordinates to match the snapshot period if there's no year overlap between data and snapshots.
+2. **Shifts** time coordinates to match the snapshot period if there's no year overlap between data and snapshots (uses `pd.DatetimeIndex(da.time.values) + shift` instead of `da.time + shift` to avoid a xarray/numpy `TypeError` with `pd.DateOffset`).
 3. **Tiles** a single year of data across multi-year snapshots by copying and concatenating with year-specific offsets.
 
 Used by both `build_river_water_heat_potential.py` (HERA river/ambient data) and `build_sea_water_heat_potential.py` (seawater temperature data).
