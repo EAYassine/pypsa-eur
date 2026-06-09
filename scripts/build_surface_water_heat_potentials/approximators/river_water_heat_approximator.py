@@ -106,7 +106,9 @@ class RiverWaterHeatApproximator(SurfaceWaterHeatApproximator):
             Approximated river temperature
         """
         # Time steps per day
-        time_steps_per_day = int(24 / float(ambient_temperature.time.dt.hour.frequency))
+        time_diff = np.diff(ambient_temperature.time.values).min()
+        time_diff_h = time_diff.astype("timedelta64[h]").astype(float)
+        time_steps_per_day = int(24 / time_diff_h)
         # Window for moving average
         window = time_steps_per_day * moving_average_num_days
         if window > len(ambient_temperature.time):

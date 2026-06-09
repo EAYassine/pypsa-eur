@@ -88,7 +88,6 @@ sector:
 
 clustering:
   temporal:
-    resolution_elec: 24h
     resolution_sector: 24h
 
 lines:
