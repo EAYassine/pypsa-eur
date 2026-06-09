@@ -601,10 +601,14 @@ def input_seawater_temperature(w) -> dict[str, str]:
     # Import here to avoid circular imports
     from scripts._helpers import get_snapshots
 
-    # Get all snapshots and extract unique years
-    snapshots_config = config_provider("snapshots")(w)
-    snapshots = get_snapshots(snapshots_config)
-    unique_years = snapshots.year.unique()
+    # Use override year if set, otherwise derive from snapshots
+    override_year = config_provider("sector", "seawater_temperature_year")(w)
+    if override_year is not None:
+        unique_years = [override_year]
+    else:
+        snapshots_config = config_provider("snapshots")(w)
+        snapshots = get_snapshots(snapshots_config)
+        unique_years = snapshots.year.unique()
 
     # Create dictionary with year-specific keys
     return {

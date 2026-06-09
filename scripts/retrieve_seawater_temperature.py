@@ -81,19 +81,22 @@ if __name__ == "__main__":
             f"Successfully downloaded test-cutout seawater temperature data to {snakemake.output.seawater_temperature}"
         )
     else:
-        # Download seawater temperature data from Copernicus Marine Service
-        # Dataset: Global Ocean Physics Reanalysis (daily, 0.083° resolution)
-        # Variable: thetao (potential temperature in °C)
-        # Spatial coverage: European waters (-12°W to 42°E, 33°N to 72°N)
-        # Depth range: 5-15m (suitable for heat pump intake depths)
+        # Determine data year: use override year from config if set,
+        # otherwise use the wildcard year directly.
+        override_year = snakemake.config.get("sector", {}).get(
+            "seawater_temperature_year"
+        )
+        target_year = int(snakemake.wildcards.year)
+        data_year = override_year if override_year is not None else target_year
+
         logger.info(
-            f"Downloading seawater temperature data for year {snakemake.wildcards.year}"
+            f"Downloading seawater temperature data for year {data_year}"
         )
 
         _ = copernicusmarine.subset(
             dataset_id="cmems_mod_glo_phy_my_0.083deg_P1D-m",  # Global ocean physics reanalysis
-            start_datetime=f"{snakemake.wildcards.year}-01-01",
-            end_datetime=f"{int(snakemake.wildcards.year)}-12-31",
+            start_datetime=f"{data_year}-01-01",
+            end_datetime=f"{data_year}-12-31",
             minimum_longitude=-12,  # Western European boundary
             maximum_longitude=42,  # Eastern European boundary
             minimum_latitude=33,  # Southern European boundary
@@ -111,6 +114,19 @@ if __name__ == "__main__":
                 f"One reason might be missing Copernicus Marine login info. "
                 f"See the copernicusmarine package documentation for details."
             )
+
+        # Drop Feb 29 from downloaded data to avoid leap-day issues downstream
+        import os as _os
+        import xarray as xr
+
+        with xr.open_dataset(snakemake.output.seawater_temperature) as ds:
+            has_leap_day = ((ds.indexes["time"].month == 2) & (ds.indexes["time"].day == 29)).any()
+            if has_leap_day:
+                logger.info("Dropping Feb 29 from seawater temperature data")
+                ds = ds.sel(time=~((ds.time.dt.month == 2) & (ds.time.dt.day == 29)))
+                tmp = snakemake.output.seawater_temperature + ".tmp"
+                ds.to_netcdf(tmp)
+                _os.replace(tmp, snakemake.output.seawater_temperature)
 
         logger.info(
             f"Successfully downloaded seawater temperature data to {snakemake.output.seawater_temperature}"

@@ -51,6 +51,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from _helpers import (
+    _rebase_and_tile_time,
     configure_logging,
     get_snapshots,
     set_scenario_config,
@@ -61,34 +62,6 @@ from approximators.river_water_heat_approximator import RiverWaterHeatApproximat
 logger = logging.getLogger(__name__)
 
 MEMORY_SAFETY_FACTOR = 0.7  # Use 70% of available memory for Dask arrays
-
-
-def _rebase_and_tile_time(
-    da: xr.DataArray, snapshots: pd.DatetimeIndex
-) -> xr.DataArray:
-    """Shift time coords to match snapshot period; tile single year across multi-year."""
-    data_years = pd.DatetimeIndex(da.time.values).year.unique()
-    snap_years = snapshots.year.unique()
-
-    if not set(data_years) & set(snap_years):
-        shift = pd.DateOffset(years=int(snap_years.min() - data_years.min()))
-        da = da.copy(deep=False)
-        da["time"] = da.time + shift
-        data_years = pd.DatetimeIndex(da.time.values).year.unique()
-
-    if len(data_years) == 1 and len(snap_years) > 1:
-        src_year = data_years[0]
-        pieces = [da]
-        for tgt_year in snap_years:
-            if tgt_year == src_year:
-                continue
-            offset = pd.DateOffset(years=int(tgt_year - src_year))
-            piece = da.copy(deep=False)
-            piece["time"] = da.time + offset
-            pieces.append(piece)
-        da = xr.concat(pieces, dim="time").sortby("time")
-
-    return da
 
 
 def load_hera_data(

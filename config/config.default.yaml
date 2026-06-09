@@ -984,6 +984,7 @@ sector:
       gas: 122
       oil: 125
   hera_data_year:
+  seawater_temperature_year:
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#industry
 industry:

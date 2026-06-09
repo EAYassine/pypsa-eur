@@ -9,7 +9,7 @@ import logging
 
 import pandas as pd
 
-from scripts._helpers import configure_logging, get_snapshots, set_scenario_config
+from scripts._helpers import configure_logging, set_scenario_config
 
 idx = pd.IndexSlice
 
@@ -29,13 +29,7 @@ if __name__ == "__main__":
 
     config = snakemake.config["energy"]
 
-    if snakemake.wildcards.kind == "heat":
-        snapshots = get_snapshots(
-            snakemake.params.snapshots, snakemake.params.drop_leap_day
-        )
-        data_years = snapshots.year.unique()
-    else:
-        data_years = int(config["energy_totals_year"])
+    data_years = int(config["energy_totals_year"])
 
     pop_layout = pd.read_csv(snakemake.input.clustered_pop_layout, index_col=0)
 

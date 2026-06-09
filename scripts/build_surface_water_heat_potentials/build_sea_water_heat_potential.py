@@ -45,6 +45,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from _helpers import (
+    _rebase_and_tile_time,
     configure_logging,
     get_snapshots,
     set_scenario_config,
@@ -291,6 +292,13 @@ if __name__ == "__main__":
         .assign_coords(name=regions_onshore.index)
         .dropna(dim="time")
     )  # Remove invalid time points
+
+    # Rebase and tile time index if using an override year
+    override_year = snakemake.config.get("sector", {}).get(
+        "seawater_temperature_year"
+    )
+    if override_year is not None:
+        temperature = _rebase_and_tile_time(temperature, snapshots)
 
     # Align temperature data to simulation snapshots
     # Use "nearest" method to handle any minor timestamp differences

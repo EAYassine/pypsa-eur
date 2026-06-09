@@ -14,7 +14,7 @@ A `prepared_cutout_dir` config option has been added to the `atlite` section. Wh
 
 A `sector.hera_data_year` config option (default `null`) overrides the year(s) used for HERA river discharge and ambient temperature data. When set (e.g. `sector.hera_data_year: 2020`), only that year's data is retrieved and its time index is rebased to match the snapshot period. If snapshots span multiple years, the single year is tiled (replicated) across all snapshot years. When `null` (default), HERA years are derived from snapshot years as before.
 
-This was added because the JRC HERA URLs (`dis.HERA{year}.nc`, `ta6_{year}.nc`) do not exist for future years (2030+), so a historical year must be used. The rebase+tile logic lives in `_rebase_and_tile_time()` in `scripts/build_surface_water_heat_potentials/build_river_water_heat_potential.py`.
+This was added because the JRC HERA URLs (`dis.HERA{year}.nc`, `ta6_{year}.nc`) do not exist for future years (2030+), so a historical year must be used. The rebase+tile logic is shared via `_rebase_and_tile_time()` in `scripts/_helpers.py`.
 
 ### Custom atlite module registration
 
@@ -58,6 +58,37 @@ else:
 
 Set `load.fixed_year: 2019` (or another year with good coverage) in the config to use historical load data rebased to the snapshot year.
 
+### Shared time-rebase utility: `_rebase_and_tile_time` in `_helpers.py`
+
+A public function `_rebase_and_tile_time(da, snapshots)` lives in `scripts/_helpers.py:925-964`. It:
+
+1. **Drops Feb 29** entries from the time dimension before any time-shifting to avoid leap-day crashes (e.g. 2020→2030 where 2020 has Feb 29 but 2030 doesn't).
+2. **Shifts** time coordinates to match the snapshot period if there's no year overlap between data and snapshots.
+3. **Tiles** a single year of data across multi-year snapshots by copying and concatenating with year-specific offsets.
+
+Used by both `build_river_water_heat_potential.py` (HERA river/ambient data) and `build_sea_water_heat_potential.py` (seawater temperature data).
+
+### Sea water temperature year override
+
+A `sector.seawater_temperature_year` config option (default `null`) overrides the year used for sea water temperature data from Copernicus Marine Service. When set (e.g. `sector.seawater_temperature_year: 2020`), only that one year is downloaded, Feb 29 is stripped, and the build script rebases+tiles the time index to match snapshots in memory.
+
+#### Retrieve script (`scripts/retrieve_seawater_temperature.py`)
+
+- Downloads data for the override year via `copernicusmarine.subset()`.
+- Opens the NetCDF in a context manager, checks for Feb 29 entries, and if present writes to a temp file then atomically replaces the original (`os.replace`). This circumvents restrictive permissions set by the download tool.
+
+#### Input helper (`rules/build_sector.smk:607-610`)
+
+`input_seawater_temperature()` returns only one input path when the override year is set (matching the HERA pattern), instead of one per snapshot year. This avoids redundant 1.25 GB downloads for multi-year scenarios.
+
+#### Build script (`scripts/.../build_sea_water_heat_potential.py:296-301`)
+
+Before `.sel(time=snapshots)`, calls `_rebase_and_tile_time()` from `_helpers` to shift timestamps from the override year to snapshot years, and tile across multi-year snapshots. Only active when `seawater_temperature_year` is set.
+
+### Heat totals use `energy_totals_year` instead of snapshot years
+
+`scripts/build_population_weighted_energy_totals.py` selects data years for the heat totals CSV. Previously the `kind=heat` branch used `snapshots.year.unique()` which returned future years (e.g. 2030) not present in the historical heat totals data, causing `KeyError: 2030`. The fix collapses both branches to use the existing `config["energy_totals_year"]` (default `2023`), which matches the historical coverage of the input data. Set `energy.energy_totals_year: 2019` in the config for consistency with `load.fixed_year`.
+
 ## Environment & orchestration
 
 - **Package manager**: Pixi (conda-forge ecosystem). `pixi install` to set up, `pixi run <task>` to run tasks.
@@ -85,7 +116,7 @@ Run a single snakemake rule: `snakemake -call <rule_name> --configfile config/te
 Snakefile              — Workflow entrypoint. Includes rules/*.smk.
 rules/                 — Snakemake rule files (collect, retrieve, build, solve, postprocess)
 scripts/               — Python scripts called by Snakemake rules
-scripts/_helpers.py    — Shared utilities: mock_snakemake, configure_logging, update_config_from_wildcards, etc.
+scripts/_helpers.py    — Shared utilities: mock_snakemake, configure_logging, update_config_from_wildcards, _rebase_and_tile_time, etc.
 scripts/lib/validation/ — Config schema validation (pydantic/pandera)
 config/                — YAML configs + JSON schema
 config/test/           — Test-specific configs (use HiGHS solver, small scale)

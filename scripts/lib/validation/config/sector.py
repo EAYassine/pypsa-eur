@@ -929,3 +929,11 @@ class SectorConfig(BaseModel):
         "all snapshot years. If None (default), HERA years are derived from "
         "snapshot years.",
     )
+
+    seawater_temperature_year: int | None = Field(
+        None,
+        description="Manually specify a single reference year for sea water "
+        "temperature data. If set, data for that year is retrieved from "
+        "Copernicus Marine and its time index is rebased to match the snapshot "
+        "year. If None (default), the snapshot year is used directly.",
+    )

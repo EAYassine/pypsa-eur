@@ -5146,6 +5146,18 @@
           ],
           "default": null,
           "description": "Manually specify a single reference year for HERA river discharge and ambient temperature data. If set, that year's data is retrieved, its time index is rebased to match the snapshot period, and if snapshots span multiple years the single year is tiled across all snapshot years. If None (default), HERA years are derived from snapshot years."
+        },
+        "seawater_temperature_year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Manually specify a single reference year for sea water temperature data. If set, data for that year is retrieved from Copernicus Marine and its time index is rebased to match the snapshot year. If None (default), the snapshot year is used directly."
         }
       }
     },
@@ -11638,6 +11650,18 @@
           ],
           "default": null,
           "description": "Manually specify a single reference year for HERA river discharge and ambient temperature data. If set, that year's data is retrieved, its time index is rebased to match the snapshot period, and if snapshots span multiple years the single year is tiled across all snapshot years. If None (default), HERA years are derived from snapshot years."
+        },
+        "seawater_temperature_year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Manually specify a single reference year for sea water temperature data. If set, data for that year is retrieved from Copernicus Marine and its time index is rebased to match the snapshot year. If None (default), the snapshot year is used directly."
         }
       }
     },

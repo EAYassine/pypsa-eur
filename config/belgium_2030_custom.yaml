@@ -81,6 +81,7 @@ renewable:
 
 sector:
   hera_data_year: 2020
+  seawater_temperature_year: 2020
 
 clustering:
   temporal:
