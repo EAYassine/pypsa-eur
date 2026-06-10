@@ -425,9 +425,9 @@ conventional:
   unit_commitment: false
   dynamic_fuel_price: false
   fuel_price_rolling_window: 6
-  fixed_year: false
+  fixed_year: false  # use this year's column from per-carrier CSV files (avoids KeyError for future snapshot years)
   nuclear:
-    p_max_pu: data/nuclear_p_max_pu.csv
+    p_max_pu: data/nuclear_p_max_pu.csv  # annual avg capacity factor per country (planned + unplanned outages)
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#lines
 lines:
@@ -490,6 +490,7 @@ transformers:
   type: ""
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#load
+# NB: Albania (AL) load is always replaced by 2024 template (direct assignment, ignores ENTSO-E data)
 load:
   fill_gaps:
     enable: true
@@ -497,7 +498,7 @@ load:
     time_shift_for_large_gaps: 1w
   manual_adjustments: true
   scaling_factor: 1.0
-  fixed_year: false
+  fixed_year: false  # use this year's load profile rebased to snapshot year.; 
   supplement_synthetic: true
   substation_only: true
   distribution_key:

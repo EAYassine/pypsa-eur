@@ -233,8 +233,11 @@ if __name__ == "__main__":
         snakemake.params.snapshots, snakemake.params.drop_leap_day
     )
 
-    # supported year ranges
-    years = slice("2010", "2025")
+    fixed_year = snakemake.params["load"].get("fixed_year", False)
+
+    max_data_year = max(2025, int(fixed_year)) if fixed_year else 2025
+
+    years = slice("2010", str(max_data_year))
 
     interpolate_limit = snakemake.params.load["fill_gaps"]["interpolate_limit"]
     countries = snakemake.params.countries
@@ -255,43 +258,43 @@ if __name__ == "__main__":
     if "UA" in countries:
         # use 2021 as template for filling missing years
         s = load.loc["2021", "UA"]
-        fill_values = repeat_years(s, range(2010, 2026))
+        fill_values = repeat_years(s, range(2010, max_data_year + 1))
         load["UA"] = load["UA"].combine_first(fill_values)
 
     if "MD" in countries:
         # use 2022 as template for filling missing years
         s = load.loc["2022", "MD"]
-        fill_values = repeat_years(s, range(2010, 2025))
+        fill_values = repeat_years(s, range(2010, max_data_year + 1))
         load["MD"] = load["MD"].combine_first(fill_values)
 
     if "AL" in countries:
         # use 2024 as template for filling missing and erroneous years
         s = load.loc["2024", "AL"]
-        fill_values = repeat_years(s, range(2010, 2026))
+        fill_values = repeat_years(s, range(2010, max_data_year + 1))
         load.loc[fill_values.index, "AL"] = fill_values
 
     if "BA" in countries:
         # use 2024 as template for filling missing and erroneous years
         s = load.loc["2024", "BA"]
-        fill_values = repeat_years(s, range(2010, 2026))
+        fill_values = repeat_years(s, range(2010, max_data_year + 1))
         load["BA"] = load["BA"].combine_first(fill_values)
 
     if "XK" in countries:
         # use 2024 as template for filling missing and erroneous years
         s = load.loc["2024", "XK"]
-        fill_values = repeat_years(s, range(2010, 2024))
+        fill_values = repeat_years(s, range(2010, max_data_year + 1))
         load["XK"] = load["XK"].combine_first(fill_values)
 
     if "MK" in countries:
         # use 2024 as template for filling missing and erroneous years
         s = load.loc["2024", "MK"]
-        fill_values = repeat_years(s, range(2025, 2026))
+        fill_values = repeat_years(s, range(max_data_year, max_data_year + 1))
         load["MK"] = load["MK"].combine_first(fill_values)
 
     if "CY" in countries:
         # use 2021 as template for filling missing years
         s = load.loc["2021", "CY"]
-        fill_values = repeat_years(s, range(2010, 2026))
+        fill_values = repeat_years(s, range(2010, max_data_year + 1))
         load["CY"] = load["CY"].combine_first(fill_values)
 
     if snakemake.params.load["manual_adjustments"]:
@@ -305,8 +308,6 @@ if __name__ == "__main__":
             f"Filling larger gaps by copying time-slices of period '{time_shift}'."
         )
         load = load.apply(fill_large_gaps, shift=time_shift)
-
-    fixed_year = snakemake.params["load"].get("fixed_year", False)
 
     if snakemake.params.load["supplement_synthetic"]:
         logger.info("Supplement missing data with synthetic data.")
